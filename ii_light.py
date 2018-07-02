@@ -117,13 +117,25 @@ class ISGRIIILCSum(ddosa.DataAnalysis):
 
     cached=True
 
-    version="v1"
+    version="v2"
 
     def main(self):
-        pass
+        total=None
 
- #       for l in allsource_summary:
-#            print(l[0] #,l[1].shape)
+        for lc in self.input_iilclist.lcs:
+            print(lc.lc.get_path())
+            f=fits.open(lc.lc.get_path())
+
+            if total is None:
+                total=f
+            else:
+                for i in range(len(f)-2):
+                    total[2+i].data=concatenate((total[2+i].data,f[2+i].data))
+
+        total_fn="total_ii_light.fits"
+        f.writeto(total_fn,overwrite=True)
+        self.lc=da.DataFile(total_fn)
+
 
 
 
