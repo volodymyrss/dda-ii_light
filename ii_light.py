@@ -125,10 +125,10 @@ class ISGRIIILCSum(ddosa.DataAnalysis):
 
     cached=True
 
-    version="v2"
+    version="v3"
 
     def main(self):
-        total=None
+        total={}
 
         for lc in self.input_iilclist.lcs:
             if not hasattr(lc,'lc'):
@@ -138,16 +138,19 @@ class ISGRIIILCSum(ddosa.DataAnalysis):
             print(lc.lc.get_path())
             f=fits.open(lc.lc.get_path())
 
-            if total is None:
-                total=f
-            else:
-                for i in range(len(f)-2):
-                    total[2+i].data=concatenate((total[2+i].data,f[2+i].data))
+            for i in range(len(f)-2):
+                e=f[2+i]
+                k=e.header['NAME'],(e.header['E_MIN'],e.header['E_MAX'])
 
-        if total is not None:
-            total_fn="total_ii_light.fits"
-            total.writeto(total_fn,overwrite=True)
-            self.lc=da.DataFile(total_fn)
+                if k not in total:
+                    total[k]=e
+                else:
+                    total[k].data=concatenate((total[k].data,e.data))
+
+        for k,e in total.items():
+            total_fn="total_ii_light_%s_%.5lg_%.5lg.fits"%(k[0],k[1][0],k[1][1])
+            e.writeto(total_fn,overwrite=True)
+            setattr(self,total_fn.replace(".fits",""),da.DataFile(total_fn))
 
 
 
