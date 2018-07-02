@@ -1,7 +1,7 @@
 import ddosa
 import dataanalysis as da
 from dataanalysis import hashtools, graphtools
-import pyfits
+import astropy.io.fits as fits
 from numpy import *
 
 
@@ -62,7 +62,7 @@ class ii_light(ddosa.DataAnalysis):
         self.lc=da.DataFile(lc_fn)
         
 
-        for e in pyfits.open(lc_fn)[2:]:
+        for e in fits.open(lc_fn)[2:]:
             e1=e.header['E_MIN']
             e2=e.header['E_MAX']
             name=e.header['NAME']
@@ -74,7 +74,7 @@ class PowerSpectrum(da.DataAnalysis):
 
     def main(self):
         lc_fn=self.input_lc.lc.get_path()
-        for e in pyfits.open(lc_fn)[2:]:
+        for e in fits.open(lc_fn)[2:]:
             e1=e.header['E_MIN']
             e2=e.header['E_MAX']
             name=e.header['NAME']
