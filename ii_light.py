@@ -1,5 +1,6 @@
 import ddosa
 import dataanalysis as da
+from dataanalysis import hashtools, graphtools
 import pyfits
 from numpy import *
 
@@ -85,4 +86,48 @@ class PowerSpectrum(da.DataAnalysis):
             freqs=fft.fftfreq(r.size, self.input_lc.tbin)
 
             savetxt("powerspec_%.5lg_%s_%.5lg_%.5lg.txt"%(self.input_lc.tbin,name.replace(" ","_"),e1,e2),column_stack((freqs,ps)))
+
+
+class Factorize_ii_light(graphtools.Factorize):
+    root='ii_light'
+    leaves=["ScWData","Revolution"]
+
+class ScWIILCList(ddosa.DataAnalysis):
+    input_scwlist=ddosa.RevScWList
+    copy_cached_input=False
+    input_iilcsummary=Factorize_ii_light
+
+    allow_alias=True
+
+    version="v0"
+    
+    maxspec=None
+
+    def main(self):
+        self.lcs=[ii_light(assume=scw) for scw in self.input_scwlist.scwlistdata]
+
+        if len(self.lcs)==0:
+            raise ddosa.EmptyScWList()
+        
+
+class ISGRIIILCSum(ddosa.DataAnalysis):
+    input_iilclist=ScWIILCList
+
+    copy_cached_input=False
+
+    cached=True
+
+    version="v1"
+
+    def main(self):
+        pass
+
+ #       for l in allsource_summary:
+#            print(l[0] #,l[1].shape)
+
+
+
+#import dataanalysis.callback
+#dataanalysis.callback.default_callback_filter.set_callback_accepted_classes([ddosa.mosaic_ii_skyimage, ddosa.ii_skyimage, ddosa.BinEventsImage, ddosa.ibis_gti, ddosa.ibis_dead, ddosa.ISGRIEvents, ddosa.ii_spectra_extract, ddosa.BinEventsSpectra, ddosa.ii_lc_extract, ddosa.BinEventsLC, ISGRISpectraSum])
+
 
