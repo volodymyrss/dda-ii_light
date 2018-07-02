@@ -2,6 +2,8 @@ import ddosa
 import dataanalysis as da
 from dataanalysis import hashtools, graphtools
 import astropy.io.fits as fits
+import pilton
+import re
 from numpy import *
 
 
@@ -57,17 +59,23 @@ class ii_light(ddosa.DataAnalysis):
         ht['chatter']=5
         ht['delta_t']=self.tbin
 
-        ht.run()
+        try:
+            ht.run()
+        except pilton.HEAToolException as e:
+            r=re.search("(terminating with status -25801)",ht.output)
+            if r:
+                print("this code makes sense",r.groups())
+            else:
+                raise
+        else:
+            self.lc=da.DataFile(lc_fn)
 
-        self.lc=da.DataFile(lc_fn)
-        
+            for e in fits.open(lc_fn)[2:]:
+                e1=e.header['E_MIN']
+                e2=e.header['E_MAX']
+                name=e.header['NAME']
 
-        for e in fits.open(lc_fn)[2:]:
-            e1=e.header['E_MIN']
-            e2=e.header['E_MAX']
-            name=e.header['NAME']
-
-            savetxt("lc_%.5lg_%s_%.5lg_%.5lg.txt"%(self.tbin,name.replace(" ","_"),e1,e2),e.data)
+                savetxt("lc_%.5lg_%s_%.5lg_%.5lg.txt"%(self.tbin,name.replace(" ","_"),e1,e2),e.data)
 
 class PowerSpectrum(da.DataAnalysis):
     input_lc=ii_light
@@ -123,6 +131,10 @@ class ISGRIIILCSum(ddosa.DataAnalysis):
         total=None
 
         for lc in self.input_iilclist.lcs:
+            if not hasattr(lc,'lc'):
+                print("empty")
+                continue
+
             print(lc.lc.get_path())
             f=fits.open(lc.lc.get_path())
 
@@ -132,9 +144,10 @@ class ISGRIIILCSum(ddosa.DataAnalysis):
                 for i in range(len(f)-2):
                     total[2+i].data=concatenate((total[2+i].data,f[2+i].data))
 
-        total_fn="total_ii_light.fits"
-        f.writeto(total_fn,overwrite=True)
-        self.lc=da.DataFile(total_fn)
+        if total is not None:
+            total_fn="total_ii_light.fits"
+            total.writeto(total_fn,overwrite=True)
+            self.lc=da.DataFile(total_fn)
 
 
 
