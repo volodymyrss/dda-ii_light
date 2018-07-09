@@ -6,6 +6,13 @@ import pilton
 import re
 from numpy import *
 
+class TimeBin(ddosa.DataAnalysis):
+    tbin=2
+
+    def get_version(self):
+        return self.get_signature()+"."+self.version+".%.5lg"%self.tbin
+        
+
 
 class ii_light(ddosa.DataAnalysis):
     input_events=ddosa.ISGRIEvents
@@ -16,12 +23,12 @@ class ii_light(ddosa.DataAnalysis):
     input_gti=ddosa.ibis_gti
     input_dead=ddosa.ibis_dead
 
-    tbin=2
+    input_binning=TimeBin
 
     cached=True
 
     def get_version(self):
-        return self.get_signature()+"."+self.version+".%.5lgs"%self.tbin
+        return self.get_signature()+"."+self.version+".%.5lgs"%self.input_binning.tbin
 
     def main(self):
         ddosa.construct_gnrl_scwg_grp(self.input_scw,[\
@@ -57,7 +64,7 @@ class ii_light(ddosa.DataAnalysis):
         ht['source_selectDol']=""
         ht['onlydet']="no"
         ht['chatter']=5
-        ht['delta_t']=self.tbin
+        ht['delta_t']=self.input_binning.tbin
 
         try:
             ht.run()
@@ -75,7 +82,7 @@ class ii_light(ddosa.DataAnalysis):
                 e2=e.header['E_MAX']
                 name=e.header['NAME']
 
-                savetxt("lc_%.5lg_%s_%.5lg_%.5lg.txt"%(self.tbin,name.replace(" ","_"),e1,e2),e.data)
+                savetxt("lc_%.5lg_%s_%.5lg_%.5lg.txt"%(self.input_binning.tbin,name.replace(" ","_"),e1,e2),e.data)
 
 class PowerSpectrum(da.DataAnalysis):
     input_lc=ii_light
