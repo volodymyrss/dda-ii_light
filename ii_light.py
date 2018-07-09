@@ -28,7 +28,7 @@ class ii_light(ddosa.DataAnalysis):
     cached=True
 
     def get_version(self):
-        return self.get_signature()+"."+self.version+".%.5lgs"%self.input_binning.tbin
+        return self.get_signature()+"."+self.version
 
     def main(self):
         ddosa.construct_gnrl_scwg_grp(self.input_scw,[\
