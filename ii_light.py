@@ -33,7 +33,7 @@ class ii_light(ddosa.DataAnalysis):
     def main(self):
         ddosa.construct_gnrl_scwg_grp(self.input_scw,[\
             self.input_events.events.get_path(), \
-            self.input_scw.scwpath+"/isgri_events.fits[3]", \
+            self.input_scw.scwpath+"/isgri_events.fits[ISGR-EVTS-ALL]", \
             self.input_scw.scwpath+"/ibis_hk.fits[IBIS-DPE.-CNV]", \
             self.input_scw.auxadppath+"/time_correlation.fits[AUXL-TCOR-HIS]", \
             self.input_gti.output_gti.get_path(), \
